@@ -758,61 +758,32 @@ function makePowerupIcon(kind: string, color: number): THREE.Group {
       icon.add(bar);
     }
   } else if (kind === "pepper") {
-    // chili pepper: tapered curved body (fat shoulder -> pointed tip) + curved green stem
-    const segs = 8;
-    for (let i = 0; i < segs; i++) {
-      const t = i / (segs - 1);
-      // taper: wide at the top shoulder, narrowing to the tip
-      const r = 0.17 * (1 - t) + 0.03;
-      const seg = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), mat(color));
-      // gentle J-shaped curve
-      const a = t * 1.7;
-      seg.position.set(Math.sin(a) * 0.28 - 0.04, 0.28 - t * 0.62, 0);
-      icon.add(seg);
-    }
-    // pointed tip
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 8), mat(color));
-    tip.position.set(Math.sin(1.7) * 0.28 - 0.04, 0.28 - 0.66, 0);
-    tip.rotation.z = -1.7;
+    // chili pepper: curved red body + green stem
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.4, 6, 12), mat(color));
+    body.rotation.z = 0.5;
+    body.position.y = -0.08;
+    icon.add(body);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 8), mat(color));
+    tip.position.set(0.16, -0.34, 0);
+    tip.rotation.z = -0.6;
     icon.add(tip);
-    // green stem rising from the shoulder
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.055, 0.22, 6), mat(0x4caf50));
-    stem.position.set(-0.02, 0.42, 0);
-    stem.rotation.z = 0.3;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.24, 6), mat(0x4caf50));
+    stem.position.set(-0.18, 0.26, 0);
+    stem.rotation.z = 0.5;
     icon.add(stem);
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.1, 6), mat(0x4caf50));
-    cap.position.set(-0.03, 0.3, 0);
-    icon.add(cap);
   } else {
-    // golden: a pair of curled ram horns
-    const buildHorn = (side: number): THREE.Group => {
-      const horn = new THREE.Group();
-      const segs = 9;
-      for (let i = 0; i < segs; i++) {
-        const t = i / (segs - 1);
-        const r = 0.12 * (1 - t) + 0.035;
-        const seg = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), mat(color));
-        // spiral inward and down then curl back up
-        const a = t * Math.PI * 1.6;
-        const rad = 0.22 * (1 - 0.45 * t);
-        seg.position.set(
-          side * (0.1 + Math.sin(a) * rad),
-          0.18 - Math.cos(a) * rad * 0.9 - 0.02,
-          0,
-        );
-        // small ridge rings for horn texture
-        if (i % 2 === 0 && i > 0) {
-          const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 1.05, 0.018, 6, 10), mat(0xb8860b));
-          ring.position.copy(seg.position);
-          ring.rotation.x = Math.PI / 2;
-          horn.add(ring);
-        }
-        horn.add(seg);
-      }
-      return horn;
-    };
-    icon.add(buildHorn(1));
-    icon.add(buildHorn(-1));
+    // golden: a little crown
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.18, 12, 1, true), mat(color));
+    icon.add(band);
+    for (let i = 0; i < 5; i++) {
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.26, 6), mat(color));
+      const a = (i / 5) * Math.PI * 2;
+      spike.position.set(Math.cos(a) * 0.28, 0.18, Math.sin(a) * 0.28);
+      icon.add(spike);
+      const gem = new THREE.Mesh(new THREE.IcosahedronGeometry(0.06, 0), mat(0xff4d6d));
+      gem.position.set(Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3);
+      icon.add(gem);
+    }
   }
   return icon;
 }
