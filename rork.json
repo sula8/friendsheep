@@ -2,7 +2,7 @@
   "$schema": "https://rork.com/schema/rork.json",
   "apps": [
     {
-      "name": "RAM ROYALE",
+      "name": "FriendSheep",
       "path": "web",
       "framework": "web",
       "settings": {
