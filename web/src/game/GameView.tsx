@@ -283,7 +283,12 @@ export function GameView(): React.JSX.Element {
       )}
 
       {/* ---------- BOTTOM-RIGHT BUTTONS ---------- */}
-      <div className="absolute bottom-3 right-3 flex flex-col items-end gap-2">
+      {/* on touch, sit clear above the big RAM button so nothing overlaps */}
+      <div
+        className={`absolute right-3 flex flex-col items-end gap-2 ${
+          isTouch && p.alive && hud.phase === "playing" ? "bottom-44" : "bottom-3"
+        }`}
+      >
         <button
           onClick={toggleVoice}
           className={`pointer-events-auto flex items-center gap-1 rounded-full px-3 py-2 text-xs font-black uppercase backdrop-blur-md transition ${

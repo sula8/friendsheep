@@ -114,6 +114,7 @@ export interface FarmerEntity {
   controlledBy: number | null; // eliminated player id
   swungAt: number;
   swingTarget: Ram | null;
+  postHitTimer: number; // brief recovery after landing a hit (gives prey a window to flee)
 }
 
 export interface FoundPowerup {

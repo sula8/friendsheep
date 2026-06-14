@@ -397,6 +397,7 @@ export class Engine {
         controlledBy: null,
         swungAt: 0,
         swingTarget: null,
+        postHitTimer: 0,
       };
     }
     this.farmer.active = false;
@@ -601,17 +602,39 @@ export class Engine {
       return;
     }
 
+    // post-hit recovery: the farmer plants his stick and catches his breath,
+    // giving the ram he just clobbered a clear window to dash away.
+    if (f.postHitTimer > 0) {
+      f.postHitTimer -= dt;
+      this.animateFarmer(false, 0);
+      f.mesh.position.set(f.x, 0, f.z);
+      f.mesh.rotation.y = -f.facing + Math.PI / 2;
+      return;
+    }
+
+    // leash: don't chase forever — if the farmer strays too far from the barn,
+    // he gives up and trudges home (unless it's the final phase).
+    const leash = this.arenaHalf * 1.15;
+    const fromBarn = Math.hypot(f.x - this.barnPos.x, f.z - this.barnPos.z);
+    if (!finalPhase && fromBarn > leash) {
+      f.outTimer = Math.min(f.outTimer, 0);
+    }
+
     // hunt nearest living ram (or chase via player control)
     let target: Ram | null = null;
     let best = Infinity;
     for (const r of this.rams) {
       if (!r.alive) continue;
+      if (r.barnSafe || this.now() < r.invulnUntil) continue; // can't grab sheltered/spawning rams
       const d = (r.x - f.x) ** 2 + (r.z - f.z) ** 2;
       if (d < best) {
         best = d;
         target = r;
       }
     }
+    // ignore targets that have already fled out of reach (gives dashers a real escape)
+    const giveUpRange = finalPhase ? Infinity : 13;
+    if (target && Math.sqrt(best) > giveUpRange) target = null;
     if (target) {
       const dx = target.x - f.x;
       const dz = target.z - f.z;
@@ -774,6 +797,11 @@ export class Engine {
     this.spawnParticles(ram.x, 1, ram.z, 0xff5555, 8);
     if (ram.score <= 0 && before > 0) this.eliminate(ram, null);
     if (ram.isPlayer) this.shake = Math.max(this.shake, 0.5);
+    // farmer recovers for a beat after connecting — the victim gets a real escape window
+    this.farmer.postHitTimer = 1.6;
+    this.farmer.swingTimer = 0;
+    this.farmer.swingTarget = null;
+    this.farmer.swungAt = 0;
   }
 
   // ---------------------------------------------------------------- powerups
@@ -1768,16 +1796,21 @@ export class Engine {
     }
 
 
-    // camera follow (playing)
+    // camera follow (playing) — fully tracks the player so you're never off-screen,
+    // with extra zoom-out on tall/narrow (mobile portrait) viewports to keep the
+    // action comfortably in frame.
     if (this.phase === "playing" && this.player) {
-      const zoomOut = this.roundTime >= CONFIG.phase2Start ? 4 : 0;
+      const aspect = this.camera.aspect || 1;
+      // narrow screens see less horizontally → pull the camera back
+      const portraitZoom = aspect < 0.85 ? (0.85 - aspect) * 26 : 0;
+      const zoomOut = portraitZoom;
       const target = new THREE.Vector3(
-        this.player.x * 0.6,
+        this.player.x,
         22 + zoomOut,
-        this.player.z * 0.6 + 14 + zoomOut,
+        this.player.z + 14 + zoomOut * 0.7,
       );
-      this.camera.position.lerp(target, 0.08);
-      const look = new THREE.Vector3(this.player.x * 0.5, 0, this.player.z * 0.5);
+      this.camera.position.lerp(target, 0.1);
+      const look = new THREE.Vector3(this.player.x, 0, this.player.z);
       this.camera.lookAt(look);
     }
 
