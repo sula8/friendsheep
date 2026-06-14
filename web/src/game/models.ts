@@ -342,16 +342,20 @@ function buildProceduralRam(g: THREE.Group, color: number, hatColor: number): vo
   tuft.position.set(0, 0.26, 0.02);
   head.add(tuft);
 
-  // curled horns
+  // curled horns — wrapped in a tagged group so powerups can grow/recolor them
+  const horns = new THREE.Group();
+  horns.name = "horns";
   for (const side of [-1, 1]) {
     const horn = new THREE.Mesh(
       new THREE.TorusGeometry(0.19, 0.075, 10, 18, Math.PI * 1.5),
       toon(HORN),
     );
+    horn.name = "horn";
     horn.position.set(0.23 * side, 0.16, -0.02);
     horn.rotation.set(Math.PI / 2, 0, side * 0.7);
-    head.add(horn);
+    horns.add(horn);
   }
+  head.add(horns);
   // snout
   const snout = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), toon(0x4a4642));
   snout.scale.set(1.1, 0.8, 1);

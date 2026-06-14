@@ -1231,9 +1231,61 @@ export class Engine {
     const tail = ram.mesh.getObjectByName("tail");
     if (tail) tail.rotation.x = Math.sin(this.now() * 6) * 0.25 + 0.1;
 
+    // powerup horn FX: golden = big shiny gold horns, pepper = glowing fiery horns
+    this.syncHornFX(ram);
+
     // update name + score tag
     const tag = this.tags.get(ram.id);
     if (tag) tag.update(ram.name, Math.floor(ram.score), ram.color, ram.isPlayer);
+  }
+
+  /**
+   * Drives the visible horn/aura state from active powerups:
+   * - Golden Horns: horns swell big and turn shiny gold while the mega-launch is armed.
+   * - Pepper Horns: horns glow fiery red-orange while charges remain.
+   * Reverts to normal horns once the powerup is gone.
+   */
+  private syncHornFX(ram: Ram): void {
+    const horns = ram.mesh.getObjectByName("horns");
+    if (!horns) return;
+    const t = this.now();
+    const golden = ram.powerups.golden;
+    const pepper = ram.powerups.pepperHits > 0;
+
+    // smooth target scale: big for golden, slightly enlarged + pulsing for pepper
+    const pulse = pepper ? 1 + Math.sin(t * 14) * 0.08 : 1;
+    const targetScale = golden ? 1.85 : pepper ? 1.28 * pulse : 1;
+    const s = THREE.MathUtils.lerp(horns.scale.x, targetScale, 0.25);
+    horns.scale.setScalar(s);
+
+    // emissive glow target for the active state
+    const goldHex = 0xffcf2e;
+    const pepperHex = 0xff3b1f;
+    const baseHex = 0xd9b886;
+    for (const child of horns.children) {
+      const mesh = child as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshToonMaterial & { emissive?: THREE.Color; emissiveIntensity?: number };
+      if (!mat || !mat.color) continue;
+      if (golden) {
+        mat.color.setHex(goldHex);
+        if (mat.emissive) mat.emissive.setHex(goldHex);
+        if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = 0.6 + Math.sin(t * 6) * 0.25;
+      } else if (pepper) {
+        mat.color.setHex(pepperHex);
+        if (mat.emissive) mat.emissive.setHex(pepperHex);
+        if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = 0.5 + Math.sin(t * 16) * 0.3;
+      } else {
+        mat.color.setHex(baseHex);
+        if (mat.emissive) mat.emissive.setHex(0x000000);
+        if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = 0;
+      }
+      mat.needsUpdate = true;
+    }
+
+    // spark/ember puffs trailing the horns while a powerup is live
+    if ((golden || pepper) && Math.random() < 0.25) {
+      this.spawnParticles(ram.x, 1.3, ram.z, golden ? 0xffe14d : 0xff7a2e, 2);
+    }
   }
 
   // ---------------------------------------------------------------- effects
