@@ -973,6 +973,10 @@ export class Engine {
         ram.spin = 0;
         ram.vx = 0;
         ram.vz = 0;
+        // always plant the ram back on the ground when it stops ragdolling,
+        // even if the timer ran out mid-air — otherwise it stays floating.
+        ram.y = 0;
+        ram.vy = 0;
       }
       this.syncRamMesh(ram);
       this.clampToWorld(ram);
