@@ -72,9 +72,9 @@ export function GameView(): React.JSX.Element {
 
   const share = useCallback(() => {
     const url = window.location.href;
-    const text = "I'm headbutting fools in RAM ROYALE 🐏 come get launched:";
+    const text = "I'm headbutting fools in FriendSheep 🐏 come get launched:";
     if (navigator.share) {
-      void navigator.share({ title: "RAM ROYALE", text, url });
+      void navigator.share({ title: "FriendSheep", text, url });
     } else {
       void navigator.clipboard?.writeText(`${text} ${url}`);
     }
@@ -90,7 +90,7 @@ export function GameView(): React.JSX.Element {
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#8fd16a]">
           <div className="animate-bounce text-6xl">🐏</div>
           <div className="mt-4 text-2xl font-black uppercase tracking-widest text-white drop-shadow">
-            RAM ROYALE
+            FriendSheep
           </div>
           <div className="mt-1 text-sm font-bold text-white/80">rounding up the flock…</div>
         </div>

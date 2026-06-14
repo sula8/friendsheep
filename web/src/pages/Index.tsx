@@ -31,7 +31,7 @@ export default function Index(): React.JSX.Element {
       <div className="relative z-10 flex flex-col items-center px-6">
         <div className="text-7xl">🐏</div>
         <h1 className="mt-2 text-6xl font-black uppercase tracking-tighter text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.3)] sm:text-7xl">
-          Ram Royale
+          FriendSheep
         </h1>
         <p className="mt-2 max-w-md text-lg font-bold text-white/90">
           Charge. Headbutt. Steal their points. Pop sheep. Dodge the farmer. Be
