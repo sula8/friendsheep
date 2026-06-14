@@ -1,10 +1,13 @@
 {
+  "$schema": "https://rork.com/schema/rork.json",
   "apps": [
     {
       "name": "RAM ROYALE",
       "path": "web",
-      "framework": "web"
+      "framework": "web",
+      "settings": {
+        "webSlug": "rams-royale"
+      }
     }
-  ],
-  "$schema": "https://rork.com/schema/rork.json"
+  ]
 }
